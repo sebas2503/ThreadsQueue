@@ -20,23 +20,23 @@ public:
 private:
     std::queue<T> queue_;
     std::mutex queue_mutex_;
-    std::condition_variable cv;
+    std::condition_variable alerta;
 };
 template <class T>
 void ConcurrentQueue<T>::push(const T& data)
 {
-    std::unique_lock<std::mutex> lock(queue_mutex_);
+    std::unique_lock<std::mutex> unique_lock(queue_mutex_);
     queue_.push(data);
-    cv.notify_one();
+    alerta.notify_one();
 }
 
 template <class T>
 T ConcurrentQueue<T>::pop()
 {
-    std::unique_lock<std::mutex>lock(queue_mutex_);
+    std::unique_lock<std::mutex> unique_lock(queue_mutex_);
     while(queue_.empty())
     {
-        cv.wait(lock);
+        alerta.wait(unique_lock);
     }
     T result = queue_.front();
     queue_.pop();
